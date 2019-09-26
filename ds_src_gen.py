@@ -3,7 +3,24 @@ EK_NUM = 1
 IDS = ["candles", "leds",]
 ERP_NUM = [1,4,-1,]
 IP_END = 51
+#########################################
+		#	ADVANCED	#
+CONFIGS	= []
+CONFIGS = [
+	{
+		"MagnetLock": [["upper_door", "5",],],
+		"SimpleLed":  [["illumination", "8"],],
+		"ArdSensor":  [["reed", "2", "HIGH, 400"],],
+		"Timer":	  [["music_publisher"],],
+	},
 
+	{
+		"MagnetLock": [["exit_door", "A0",], ["snicth", "A1"]],
+		"SimpleLed":  [["upper_led", "9"], ["snitch_led", "4"]],
+		"ArdSensors": ["sensors", ["3, 7, 6,", "HIGH, 400"],],
+		"Timer":	  [["reseter"],],
+	},
+]
 #########################################
 from os import getcwd, mkdir
 from os.path import join
@@ -42,7 +59,51 @@ def s_open(f_name):
 		exit()
 
 
-def config_create():
+def pin_declarator(prop_num):
+	PIN_DEC = "  constexpr uint8_t {}_PIN = {};\n"
+	PINS_DEC = "  constexpr uint8_t {}_PINS${}@ = {{\n    {}  \n  }};\n"
+	res = ""
+	prop_dict = {}
+	try:
+		prop_dict = CONFIGS[prop_num]
+	except IndexError:
+		return res
+
+	try:
+		maglocks = prop_dict["MagnetLock"]
+		for i in maglocks:
+			res += PIN_DEC.format(i[0].upper(), i[1])
+	except KeyError:
+		pass
+
+	try:
+		leds = prop_dict["SimpleLed"]
+		for i in leds:
+			res += PIN_DEC.format(i[0].upper(), i[1])
+	except KeyError:
+		pass
+
+	try:
+		ardsen = prop_dict["ArdSensor"]
+		for i in ardsen:
+			res += PIN_DEC.format(i[0].upper(), i[1])
+	except KeyError:
+		pass
+
+	try:
+		ardsens = prop_dict["ArdSensors"]
+		pins = ardsens[1][0]
+		pins_num = pins.count(",")
+		name = ardsens[0].upper()
+		count_name = name + "_PINS_COUNT"
+		res += f"  constexpr uint8_t {count_name} = {pins_num};\n"
+		res += PINS_DEC.format(name, count_name, pins)
+	except KeyError:
+		pass
+	return res.replace("$", "[").replace("@","]").replace("\'","")
+
+
+def config_creator():
 	f = s_open(join("src","config.h"))
 	content = f"""{GUARD}
 #include <Arduino.h>\n
@@ -50,8 +111,12 @@ constexpr char CIRCUIT_NAME[] = \"{get_circuit_name()}\";
 constexpr byte IP_ENDING = {str(IP_END)};
 constexpr bool UPLOAD_BOOT_INFO = true;\n
 """
-	for i in IDS:
-		content += f"namespace {i}_ns {{\n\n}}\n\n"
+	for i in range(PROPS_NUM):
+		try:
+			CONFS = pin_declarator(i);
+			content += f"namespace {IDS[i]}_ns {{\n{CONFS}\n}}\n\n"
+		except IndexError:
+			pass
 	f.write(content)
 
 
@@ -169,6 +234,113 @@ void common_routine()
 	f.write(content)
 
 
+def obj_declarator(prop_num):
+	OBJ = "{} *{};\n"
+	OBJS = "{} *{}${}@;\n"
+	res = ""
+	prop_dict = {}
+	try:
+		prop_dict = CONFIGS[prop_num]
+	except IndexError:
+		return res
+	try:
+		maglocks = prop_dict["MagnetLock"]
+		for i in maglocks:
+			res += OBJ.format("MagnetLock", i[0])
+	except KeyError:
+		pass
+
+	try:
+		leds = prop_dict["SimpleLed"]
+		for i in leds:
+			res += OBJ.format("SimpleLed", i[0])
+	except KeyError:
+		pass
+
+	try:
+		ardsen = prop_dict["ArdSensor"]
+		for i in ardsen:
+			res += OBJ.format("ArdSensor", i[0])
+	except KeyError:
+		pass	
+
+	try:
+		ardsens = prop_dict["ArdSensors"]
+		pins = ardsens[1][0]
+		name = ardsens[0]
+		pins_num = f"{IDS[prop_num]}_ns::{name.upper()}_PINS_COUNT"
+		res += OBJS.format("ArdSensor", ardsens[0], pins_num)
+	except KeyError:
+		pass
+
+	try:
+		timer = prop_dict["Timer"]
+		for i in timer:
+			res += OBJ.format("Timer", i[0])
+	except KeyError:
+		pass
+
+	return res.replace("$", "[").replace("@","]")
+
+
+def obj_initor(prop_num):
+	OBJ = "  {} = new {}({});\n"
+	OBJS = """  for (size_t i = 0; i < {}; ++i) {{
+    {}$i@ = new {}({});
+  }}
+"""
+	NS = "{}_ns::{}_PIN{}"
+	res = ""
+	prop_dict = {}
+
+	try:
+		prop_dict = CONFIGS[prop_num]
+	except IndexError:
+		return res
+
+	try:
+		maglocks = prop_dict["MagnetLock"]
+		for i in range(len(maglocks)):
+			name = maglocks[i][0]
+			res += OBJ.format(name, "MagnetLock", NS.format(IDS[prop_num], name.upper(), ""))
+	except KeyError:
+		pass
+
+	try:
+		leds = prop_dict["SimpleLed"]
+		for i in range(len(leds)):
+			name = leds[i][0]
+			res += OBJ.format(name, "SimpleLed",
+				NS.format(IDS[prop_num], name.upper(), ""))
+	except KeyError:
+		pass
+
+	try:
+		ardsen = prop_dict["ArdSensor"]
+		for i in range(len(leds)):
+			name = ardsen[i][0]
+			res += OBJ.format(name, "ArdSensor", NS.format(IDS[prop_num], name.upper(), ""))
+	except KeyError:
+		pass	
+
+	try:
+		ardsens = prop_dict["ArdSensors"]
+		name = ardsens[0]
+		res += OBJS.format(NS.format(IDS[i], name.upper(), "S_COUNT"),
+			name, "ArdSensor",
+			NS.format(IDS[prop_num], name.upper(), "S$i@, ") + ardsens[1][1])
+	except KeyError:
+		pass
+
+	try:
+		timer = prop_dict["Timer"]
+		for i in timer:
+			res += OBJ.format(i[0], "Timer", "")
+	except KeyError:
+		pass
+
+	return res.replace("$", "[").replace("@","]")
+
 def props_creator():
 	for i in range(PROPS_NUM):
 		try:
@@ -179,28 +351,34 @@ def props_creator():
 		f = s_open(join("src", f"{name}.h"))
 		content = f"""{GUARD}
 #include "common.h"
+#include <ds_basic.h>
 
 enum {{
   {name.upper()}_STAGE_NONE,
   {name.upper()}_STAGE_GAME,
-  {name.upper()}_STAGE_DONE }} {name}_stage;
-
+  {name.upper()}_STAGE_DONE }} {name}_stage;\n\n"""		
+		content += obj_declarator(i)
+		content += f"""
 void {name}_onActivate()
 {{
-	
+  console->println(F(\"{name}: onActivated\"));
   {name}_stage = {name.upper()}_STAGE_GAME;  
   strcpy(props_states${name.upper()}_STATE_POS@, MQTT_STRSTATUS_ENABLED);
 }}
 
 void {name}_onFinish()
 {{
+  console->println(F(\"{name}: onFinish\"));
   {name}_stage = {name.upper()}_STAGE_DONE;  
   strcpy(props_states${name.upper()}_STATE_POS@, MQTT_STRSTATUS_FINISHED);
 }}
 
 void {name}_init()
-{{
-	
+{{\n"""
+		content += obj_initor(i)
+		content += f"""
+  {name}_stage = {name.upper()}_STAGE_NONE;  
+  strcpy(props_states${name.upper()}_STATE_POS@, MQTT_STRSTATUS_READY);
 }}
 
 void {name}_routine()
@@ -209,6 +387,7 @@ void {name}_routine()
 }}
 """
 		content = content.replace("$", "[").replace("@","]")
+		#print(content)
 		f.write(content)
 
 
@@ -373,9 +552,8 @@ def readme_creator():
 	f.write(content)
 
 
-
 work_dir_creator()
-config_create()
+config_creator()
 common_creator()
 props_creator();
 main_creator();
