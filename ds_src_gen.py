@@ -2,10 +2,9 @@ QUEST_NAME = "Props264"
 EK_NUM = 1
 IDS = ["candles", "leds",]
 ERP_NUM = [1,4,-1,]
-IP_END = 51
+BOARD = "uno"
 #########################################
 		#	ADVANCED	#
-CONFIGS	= []
 CONFIGS = [
 	{
 		"MagnetLock": [["upper_door", "5",],],
@@ -21,15 +20,22 @@ CONFIGS = [
 		"Timer":	  [["reseter"],],
 	},
 ]
+# CONFIGS	= [] # uncomment it if no CONFIGS are needed
 #########################################
 from os import getcwd, mkdir
 from os.path import join
+
+try:
+	IP_END = 50 + ERP_NUM[0]
+except IndexError:
+	println("ERP_NUM is necessary")
+	exit()
 
 GUARD = "#pragma once"
 PROPS_NUM = len(ERP_NUM)
 
 def get_circuit_name():
-	name = f"{QUEST_NAME}_EK{EK_NUM}"
+	name = f"{QUEST_NAME}"
 	for i in IDS:
 		name += "_" + i.capitalize()
 	return name
@@ -326,7 +332,7 @@ def obj_initor(prop_num):
 	try:
 		ardsens = prop_dict["ArdSensors"]
 		name = ardsens[0]
-		res += OBJS.format(NS.format(IDS[i], name.upper(), "S_COUNT"),
+		res += OBJS.format(NS.format(IDS[prop_num], name.upper(), "S_COUNT"),
 			name, "ArdSensor",
 			NS.format(IDS[prop_num], name.upper(), "S$i@, ") + ardsens[1][1])
 	except KeyError:
@@ -341,6 +347,22 @@ def obj_initor(prop_num):
 
 	return res.replace("$", "[").replace("@","]")
 
+
+def routines_creator(prop_num):
+	ROUTINE = "  {}->routine();\n"
+	res = ""
+	timers = []
+	try:
+		timers = CONFIGS[prop_num]["Timer"]
+	except (KeyError, IndexError):
+		return ""
+
+	for i in timers:
+		res += ROUTINE.format(i);
+
+	return res.replace("]","").replace("[","").replace("\'","");
+
+
 def props_creator():
 	for i in range(PROPS_NUM):
 		try:
@@ -350,8 +372,8 @@ def props_creator():
 
 		f = s_open(join("src", f"{name}.h"))
 		content = f"""{GUARD}
-#include "common.h"
 #include <ds_basic.h>
+#include "common.h"
 
 enum {{
   {name.upper()}_STAGE_NONE,
@@ -382,12 +404,11 @@ void {name}_init()
 }}
 
 void {name}_routine()
-{{
-	
-}}
-"""
+{{\n"""
+		content += routines_creator(i)
+		content += "}"
+
 		content = content.replace("$", "[").replace("@","]")
-		#print(content)
 		f.write(content)
 
 
@@ -421,7 +442,7 @@ def ini_creator():
 	f = s_open("platformio.ini")	
 	content = f"""[env:my_env]
 platform = atmelavr
-board = uno
+board = {BOARD}
 framework = arduino
 
 ip_addr = 192.168.10.{IP_END}
@@ -535,14 +556,15 @@ env.Replace(
 )
 
 env.AddPostAction(
-    "$BUILD_DIR/${{PROGNAME}}.elf",
+    "$BUILD_DIR/${PROGNAME}.elf",
     env.VerboseAction(" ".join([
         "$OBJCOPY", "-O", "binary",
-        "$BUILD_DIR/${{PROGNAME}}.elf", "$BUILD_DIR/${{PROGNAME}}.bin"
-    ]), "Creating $BUILD_DIR/${{PROGNAME}}.bin")
+        "$BUILD_DIR/${PROGNAME}.elf", "$BUILD_DIR/${PROGNAME}.bin"
+    ]), "Creating $BUILD_DIR/${PROGNAME}.bin")
 )
 """
 	f.write(content)
+
 
 def readme_creator():
 	f = s_open("README.md")
