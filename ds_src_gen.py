@@ -2,6 +2,7 @@ QUEST_NAME = "Props264"
 EK_NUM = 1
 IDS = ["candles", "leds",]
 ERP_NUM = [1,4,-1,]
+IP_END = 50
 BOARD = "uno"
 #########################################
 		#	ADVANCED	#
@@ -24,12 +25,6 @@ CONFIGS = [
 #########################################
 from os import getcwd, mkdir
 from os.path import join
-
-try:
-	IP_END = 50 + ERP_NUM[0]
-except IndexError:
-	println("ERP_NUM is necessary")
-	exit()
 
 GUARD = "#pragma once"
 PROPS_NUM = len(ERP_NUM)
