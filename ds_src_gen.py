@@ -124,10 +124,11 @@ constexpr bool UPLOAD_BOOT_INFO = true;\n
 def common_creator():
 	f = s_open(join("src","common.h"))
 	content = f"""{GUARD}
-#include \"config.h\"
-#include <ds_bootloader.h>
-#include <ds_wdt.h>
+#include <ds_console.h>
 #include <ds_mqtt_manager.h>
+#include <ds_wdt.h>
+#include <ds_bootloader.h>
+#include \"config.h\"
 
 enum {{{[i.upper() + "_STATE_POS" for i in IDS]}}};
 """	
