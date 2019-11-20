@@ -3,7 +3,7 @@ EK_NUM = 1
 IDS = ["candles", "leds",]
 ERP_NUM = [1,4,-1,]
 IP_END = 50
-BOARD = "uno"
+BOARD = "megaatmega2560" # uno megaatmega2560
 #########################################
 		#	ADVANCED	#
 CONFIGS = [
@@ -17,7 +17,7 @@ CONFIGS = [
 	{
 		"MagnetLock": [["exit_door", "A0",], ["snicth", "A1"]],
 		"SimpleLed":  [["upper_led", "9"], ["snitch_led", "4"]],
-		"ArdSensors": ["sensors", ["3, 7, 6,", "HIGH, 400"],],
+		"ArdSensors": ["sensors", ["3, 7, 6,", "LOW, 100"],],
 		"Timer":	  [["reseter"],],
 	},
 ]
@@ -317,9 +317,10 @@ def obj_initor(prop_num):
 
 	try:
 		ardsen = prop_dict["ArdSensor"]
-		for i in range(len(leds)):
+		for i in range(len(ardsen)):
 			name = ardsen[i][0]
-			res += OBJ.format(name, "ArdSensor", NS.format(IDS[prop_num], name.upper(), ""))
+			params = ardsen[i][2]
+			res += OBJ.format(name, "ArdSensor", NS.format(IDS[prop_num], name.upper(), ", " + params))
 	except KeyError:
 		pass	
 
@@ -491,44 +492,44 @@ def upload(source, target, env):
     firmware_name = env['PROGNAME'] + '.bin'
     firmware_path = '.pio/build/' +  firmware_dir + '/' + firmware_name
 
-    print "uploading firmware to router ip:" + host
+    print ("uploading firmware to router ip:" + host)
 
     filepath = '/root/' + firmware_name
     localpath = firmware_path
-    print localpath
-    print sftp.put(localpath, filepath)
+    print (localpath)
+    print (sftp.put(localpath, filepath))
     sftp.close()
 
-    print "uploaded file is in " + filepath
+    print ("uploaded file is in " + filepath)
 
-    print "Resetting arduino..."
+    print ("Resetting arduino...")
     # arduino reset
     channel = ssh.get_transport().open_session()
     channel.get_pty()
     channel.settimeout(5.0)
     channel.exec_command('curl ' + ip_addr + ':44444') 
-    print channel.recv(1024)
+    print (channel.recv(1024))
 
     channel.close
 
     time.sleep(1)
 
     # TFTP Download
-    print "Firmware upgrade..."
+    print ("Firmware upgrade...")
     channel = ssh.get_transport().open_session()
     channel.get_pty()
     channel.settimeout(30.0)
     channel.exec_command('atftp --option "mode octet" -p -l ' + firmware_name + ' ' + ip_addr)
-    print channel.recv(1024)
-    print channel.recv(1024)
-    print channel.recv(1024)
-    print channel.recv(1024)
+    print (channel.recv(1024))
+    print (channel.recv(1024))
+    print (channel.recv(1024))
+    print (channel.recv(1024))
 
     channel.close
     # Closing all conections
     ssh.close()
 
-    #print "TFTP connection to " + ipaddr
+    #print ("TFTP connection to " + ipaddr)
 
     #firmware_dir = env['PROJECTBUILD_DIR'] + '/' + env['PIOENV']
     #firmware_dir = env['PIOENV']
@@ -540,7 +541,7 @@ def upload(source, target, env):
     #client.upload(firmware_name, '.pioenvs\\my_env')
 
     #env.Execute("ping google.ru")  
-    print "uploaded"  
+    print ("uploaded")  
 
     # env.Execute("pwd")
     #env.Execute("telnet " + ip_addr)
