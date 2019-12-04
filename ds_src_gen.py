@@ -9,7 +9,7 @@ BOARD = "megaatmega2560" # uno megaatmega2560
 CONFIGS = [
 	{
 		"MagnetLock": [["upper_door", "5",],],
-		"SimpleLed":  [["illumination", "8"],],
+		#"SimpleLed":  [["illumination", "8"],],
 		"ArdSensor":  [["reed", "2", "HIGH, 400"],],
 		"Timer":	  [["music_publisher"],],
 	},
@@ -345,7 +345,8 @@ def obj_initor(prop_num):
 
 def routines_creator(prop_num):
 	ROUTINE = "  {}->routine();\n"
-	res = ""
+	name = IDS[prop_num]
+	res = f"  if ({name}_stage != {name.upper()}_STAGE_GAME)\n    return;\n\n"
 	timers = []
 	try:
 		timers = CONFIGS[prop_num]["Timer"]
