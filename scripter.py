@@ -1,4 +1,4 @@
-from _utils import *
+from _utils import s_open
 
 def script_creator():
 	f = s_open("w5500_remote.py")
