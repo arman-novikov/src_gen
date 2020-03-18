@@ -1,12 +1,12 @@
-from _utils import *
+from data import *
 
-def pin_declarator(prop_num):
+def pin_declarator(prop_num, data):
 	PIN_DEC = "  constexpr uint8_t {}_PIN = {};\n"
 	PINS_DEC = "  constexpr uint8_t {}_PINS${}@ = {{\n    {}  \n  }};\n"
 	res = ""
 	prop_dict = {}
 	try:
-		prop_dict = get_config()[prop_num]
+		prop_dict = data.get_config()[prop_num]
 	except IndexError:
 		return res
 
@@ -44,18 +44,18 @@ def pin_declarator(prop_num):
 	return res.replace("$", "[").replace("@","]").replace("\'","")
 
 
-def config_creator():
-	f = s_open(join("src","config.h"))
-	content = f"""{get_guard()}
+def config_creator(data):
+	f = s_open(join("src","config.h"), data)
+	content = f"""{data.get_guard()}
 #include <Arduino.h>\n
-constexpr char CIRCUIT_NAME[] = \"{get_circuit_name()}\";
-constexpr byte IP_ENDING = {str(get_IP_end())};
+constexpr char CIRCUIT_NAME[] = \"{data.get_circuit_name()}\";
+constexpr byte IP_ENDING = {str(data.get_IP_end())};
 constexpr bool UPLOAD_BOOT_INFO = true;\n
 """
-	for i in range(PROPS_NUM):
+	for i in range(data.get_props_num()):
 		try:
-			CONFS = pin_declarator(i);
-			content += f"namespace {get_ids()[i]}_ns {{\n{CONFS}\n}}\n\n"
+			CONFS = pin_declarator(i, data);
+			content += f"namespace {data.get_ids()[i]}_ns {{\n{CONFS}\n}}\n\n"
 		except IndexError:
 			pass
 	f.write(content)

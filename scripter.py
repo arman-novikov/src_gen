@@ -1,7 +1,7 @@
-from _utils import s_open
+from data import s_open
 
-def script_creator():
-	f = s_open("w5500_remote.py")
+def script_creator(data):
+	f = s_open("w5500_remote.py", data)
 	content = """import requests
 import paramiko
 import time

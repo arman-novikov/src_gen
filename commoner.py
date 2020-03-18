@@ -1,11 +1,11 @@
-from _utils import *
+from data import *
 
-def common_creator():
-	ids = get_ids();
-	props_num = get_props_num()
-	erp_num = get_erp_num()
-	f = s_open(join("src","common.h"))
-	content = f"""{get_guard()}
+def common_creator(data):
+	ids = data.get_ids();
+	props_num = data.get_props_num()
+	erp_num = data.get_erp_num()
+	f = s_open(join("src","common.h"), data)
+	content = f"""{data.get_guard()}
 #include \"config.h\"
 #include <ds_bootloader.h>
 #include <ds_wdt.h>

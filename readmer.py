@@ -1,8 +1,8 @@
-from _utils import get_ids, s_open
+from data import s_open
 
-def readme_creator():
-	ids = get_ids()
-	f = s_open("README.md")
+def readme_creator(data):
+	ids = data.get_ids()
+	f = s_open("README.md", data)
 	content = ""
 	for i in ids:
 		content += f"{i}:\n\n"

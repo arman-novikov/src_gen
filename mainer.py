@@ -1,8 +1,8 @@
-from _utils import *
+from data import *
 
-def main_creator():
-	ids = get_ids()
-	f = s_open(join("src", "main.cpp"))
+def main_creator(data):
+	ids = data.get_ids()
+	f = s_open(join("src", "main.cpp"), data)
 	content = ""
 	for i in ids:
 		content += f"#include \"{i}.h\"\n"
