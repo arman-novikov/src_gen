@@ -67,31 +67,8 @@ class App(QMainWindow):
 
     @pyqtSlot()
     def generate_btn_click(self):
-        self.data.QUEST_NAME = self.defaultInps['quest name'].text()
-        if len(self.data.QUEST_NAME) == 0:
-            self.error_msg("quest name", "quest name is empty")
+        if self.default_inputs_check() is False:
             return
-
-        self.data.IDS = self.defaultInps['string ids'].text().split(' ')
-        try:
-            self.data.EK_NUM = int(self.defaultInps["EK number"].text())
-        except (ValueError, TypeError):
-            self.error_msg("EK number", "1 decimal value is expected")
-            return
-        try:
-            self.data.ERP_NUM = [
-                int(i) for i in self.defaultInps['numbers in erp'].text().split(' ')
-        ]
-        except (ValueError, TypeError):
-            self.error_msg("numbers in erp", "use decimal numbers splitted with spaces")
-            return
-        try:
-            self.data.IP_END = int(self.defaultInps['IP addr last byte'].text())
-        except (ValueError, TypeError):
-            self.error_msg("IP addr last byte", "1 decimal value is expected")
-            return
-        if self.unoRadioButton.isChecked():
-            self.data.BOARD = "uno"
         self.data.CONFIGS = []  # no gui support yet
 
         build(self.data)
@@ -106,6 +83,34 @@ class App(QMainWindow):
     def unoRadioButtonclick(self):
         self.data.BOARD = "uno"
         self.megaRadioButton.setChecked(False)
+
+    def default_inputs_check(self):
+        self.data.QUEST_NAME = self.defaultInps['quest name'].text()
+        if len(self.data.QUEST_NAME) == 0:
+            self.error_msg("quest name", "quest name is empty")
+            return False
+
+        self.data.IDS = self.defaultInps['string ids'].text().split(' ')
+        try:
+            self.data.EK_NUM = int(self.defaultInps["EK number"].text())
+        except (ValueError, TypeError):
+            self.error_msg("EK number", "1 decimal value is expected")
+            return False
+        try:
+            self.data.ERP_NUM = [
+                int(i) for i in self.defaultInps['numbers in erp'].text().split(' ')
+            ]
+        except (ValueError, TypeError):
+            self.error_msg("numbers in erp", "use decimal numbers splitted with spaces")
+            return False
+        try:
+            self.data.IP_END = int(self.defaultInps['IP addr last byte'].text())
+        except (ValueError, TypeError):
+            self.error_msg("IP addr last byte", "1 decimal value is expected")
+            return False
+        if self.unoRadioButton.isChecked():
+            self.data.BOARD = "uno"
+        return True
 
     @staticmethod
     def error_msg(topic, details="check your input"):
