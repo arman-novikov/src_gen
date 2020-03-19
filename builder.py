@@ -7,13 +7,17 @@ from initer import ini_creator
 from scripter import script_creator
 from readmer import readme_creator
 
-data = Data()
 
-work_dir_creator(data)
-config_creator(data)
-common_creator(data)
-props_creator(data);
-main_creator(data);
-ini_creator(data)
-script_creator(data)
-readme_creator(data)
+def build(data):
+    work_dir_creator(data)
+    config_creator(data)
+    common_creator(data)
+    props_creator(data)
+    main_creator(data)
+    ini_creator(data)
+    script_creator(data)
+    readme_creator(data)
+
+
+if __name__ == "__main__":
+    build(Data())

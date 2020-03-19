@@ -28,13 +28,13 @@ class App(QMainWindow):
         self.data = Data()
 
     def initUI(self):
-        centralWid = QWidget(self)
-        self.setCentralWidget(centralWid)
+        central_wid = QWidget(self)
+        self.setCentralWidget(central_wid)
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
         self.defaultWidgetsLay = QGridLayout()
         self.defaultWidgetsLay.setAlignment(Qt.AlignTop)
-        self.defaultInpsKeys = ["quest name", "EK number", "string id", "numbers in erp", "IP addr last byte"]
+        self.defaultInpsKeys = ["quest name", "EK number", "string ids", "numbers in erp", "IP addr last byte"]
         self.defaultInps = {}
 
         i = 0
@@ -62,21 +62,23 @@ class App(QMainWindow):
         self.defaultWidgetsLay.addLayout(self.radioLay, len(self.defaultInpsKeys) + 1, 0)
 
         self.generate_btn.clicked.connect(self.generate_btn_click)
-        centralWid.setLayout(self.defaultWidgetsLay)
+        central_wid.setLayout(self.defaultWidgetsLay)
         self.show()
 
     @pyqtSlot()
     def generate_btn_click(self):
         try:
-            self.data.QUEST_NAME = self.quest_name_inp.text()
-            self.data.EK_NUM = int(self.ek_inp.text())
-            #self.data.IDS =
-            #self.data.ERP_NUM =
-            #self.data.BOARD =
-        except:
+            self.data.QUEST_NAME = self.defaultInps['quest name'].text()
+            self.data.ERP_NUM = [int(i) for i in self.defaultInps['EK number'].text().split(' ')]
+            self.data.IDS = self.defaultInps['string ids'].text().split(' ')
+            if self.unoRadioButton.isChecked():
+                self.data.BOARD = "uno"
+            self.data.CONFIGS = [] # no gui support yet
+        except KeyError:
             print("generate_btn_click except")
             exit(-22)
-        print(QUEST_NAME, EK_NUM)
+        build(self.data)
+        QMessageBox.about(self, "Status", "ok")
 
     @pyqtSlot()
     def megaRadioButtonclick(self):

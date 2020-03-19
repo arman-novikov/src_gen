@@ -1,5 +1,6 @@
 from data import *
 
+
 def main_creator(data):
 	ids = data.get_ids()
 	f = s_open(join("src", "main.cpp"), data)
