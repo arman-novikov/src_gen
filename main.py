@@ -70,8 +70,11 @@ class App(QMainWindow):
         if self.default_inputs_check() is False:
             return
         self.data.CONFIGS = []  # no gui support yet
-
-        build(self.data)
+        try:
+            build(self.data)
+        except FileExistsError:
+            self.error_msg("dir error", "directory already exists")
+            return
         QMessageBox.about(self, "Status", "ok")
 
     @pyqtSlot()

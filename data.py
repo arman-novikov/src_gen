@@ -65,13 +65,10 @@ class Data:
 
 def work_dir_creator(data):	
 	wd = data.get_work_dir()
-	try:
-		mkdir(wd)
-		mkdir(join(wd, "src"))
-		mkdir(join(wd, "lib"))
-		mkdir(join(wd, "test"))
-	except FileExistsError:
-		print(f"directory already exists")
+	mkdir(wd)
+	mkdir(join(wd, "src"))
+	mkdir(join(wd, "lib"))
+	mkdir(join(wd, "test"))
 
 
 def s_open(f_name, data):
