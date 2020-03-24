@@ -15,6 +15,11 @@ class App(QMainWindow):
         self.width = 400
         self.height = 300
         self.inp_height = 30
+        self.defaultWidgetsLay = QGridLayout()
+        self.defaultWidgetsLay.setAlignment(Qt.AlignTop)
+        self.defaultInpsKeys = [
+            "quest name", "EK number", "string ids", "numbers in erp", "IP addr last byte"]
+        self.defaultInps = {}
         self.initUI()
         self.data = Data()
 
@@ -23,18 +28,11 @@ class App(QMainWindow):
         self.setCentralWidget(central_wid)
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
-        self.defaultWidgetsLay = QGridLayout()
-        self.defaultWidgetsLay.setAlignment(Qt.AlignTop)
-        self.defaultInpsKeys = ["quest name", "EK number", "string ids", "numbers in erp", "IP addr last byte"]
-        self.defaultInps = {}
 
-        i = 0
         for key in self.defaultInpsKeys:
             self.defaultInps[key] = QLineEdit(self, placeholderText=key)
-            # self.defaultInps[key].move(20, 20 + self.inp_height * (i*1.5))
             self.defaultInps[key].resize(280, self.inp_height)
             self.defaultWidgetsLay.addWidget(self.defaultInps[key])
-            i += 1
 
         self.hw_gen_mod = QCheckBox("generate hardware sources")
         self.defaultWidgetsLay.addWidget(self.hw_gen_mod)
