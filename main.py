@@ -20,8 +20,8 @@ class App(QMainWindow):
         self.defaultInpsKeys = [
             "quest name", "EK number", "string ids", "numbers in erp", "IP addr last byte"]
         self.defaultInps = {}
-        self.initUI()
         self.data = Data()
+        self.initUI()
 
     def initUI(self):
         central_wid = QWidget(self)
@@ -51,6 +51,7 @@ class App(QMainWindow):
         self.defaultWidgetsLay.addLayout(self.radioLay, len(self.defaultInpsKeys) + 1, 0)
 
         self.generate_btn.clicked.connect(self.generate_btn_click)
+        self.defaultInps['string ids'].textChanged.connect(self.str_ids_changed)
         central_wid.setLayout(self.defaultWidgetsLay)
         self.show()
 
@@ -67,6 +68,10 @@ class App(QMainWindow):
         QMessageBox.about(self, "Status", "ok")
 
     @pyqtSlot()
+    def str_ids_changed(self):
+        print(self.get_str_ids())
+
+    @pyqtSlot()
     def megaRadioButtonclick(self):
         self.data.BOARD = "megaatmega2560"
         self.unoRadioButton.setChecked(False)
@@ -76,13 +81,16 @@ class App(QMainWindow):
         self.data.BOARD = "uno"
         self.megaRadioButton.setChecked(False)
 
+    def get_str_ids(self):
+        return self.defaultInps['string ids'].text().strip().split(' ')
+
     def default_inputs_check(self):
         self.data.QUEST_NAME = self.defaultInps['quest name'].text()
         if len(self.data.QUEST_NAME) == 0:
             self.error_msg("quest name", "quest name is empty")
             return False
 
-        self.data.IDS = self.defaultInps['string ids'].text().split(' ')
+        self.data.IDS = self.get_str_ids()
         try:
             self.data.EK_NUM = int(self.defaultInps["EK number"].text())
         except (ValueError, TypeError):
