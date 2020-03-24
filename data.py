@@ -3,11 +3,11 @@ from os.path import join
 
 class Data:
 	def __init__(self):
-		self.QUEST_NAME = "Props264"
+		self.QUEST_NAME = "QUEST"
 		self.EK_NUM = 1
-		self.IDS = ["candles", "leds", ]
-		self.ERP_NUM = [1, 4, -1, ]
-		self.IP_END = 50
+		self.IDS = []
+		self.ERP_NUM = []
+		self.IP_END = 51
 		self.BOARD = "megaatmega2560"
 		self.GUARD = "#pragma once"
 		self.CONFIGS = [

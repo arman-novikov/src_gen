@@ -4,15 +4,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from builder import *
 
-QUEST_NAME = "QUEST"
-EK_NUM = 1
-IDS = []
-ERP_NUM = []
-IP_END = 50
-BOARD = "board"  # uno megaatmega2560
-GUARD = "#pragma once"
-CONFIGS = []
-
 
 class App(QMainWindow):
 
