@@ -34,9 +34,6 @@ class App(QMainWindow):
             self.defaultInps[key].resize(280, self.inp_height)
             self.defaultWidgetsLay.addWidget(self.defaultInps[key])
 
-        self.hw_gen_mod = QCheckBox("generate hardware sources")
-        self.defaultWidgetsLay.addWidget(self.hw_gen_mod)
-
         self.generate_btn = QPushButton('generate', self)
         self.generate_btn.move(self.width - 150, self.height - 50)
 
@@ -48,7 +45,14 @@ class App(QMainWindow):
         self.unoRadioButton.clicked.connect(self.unoRadioButtonclick)
         self.radioLay.addWidget(self.megaRadioButton)
         self.radioLay.addWidget(self.unoRadioButton)
-        self.defaultWidgetsLay.addLayout(self.radioLay, len(self.defaultInpsKeys) + 1, 0)
+        self.defaultWidgetsLay.addLayout(self.radioLay, len(self.defaultInpsKeys), 0)
+
+        self.hwButtonsLabel = QLabel("generate hardware sources for")
+        self.hwButtonsLabel.hide()
+        self.defaultWidgetsLay.addWidget(self.hwButtonsLabel)
+
+        self.hwButtonsLay = QHBoxLayout()
+        self.defaultWidgetsLay.addLayout(self.hwButtonsLay, len(self.defaultInpsKeys) + 2, 0)
 
         self.generate_btn.clicked.connect(self.generate_btn_click)
         self.defaultInps['string ids'].textChanged.connect(self.str_ids_changed)
@@ -70,6 +74,15 @@ class App(QMainWindow):
     @pyqtSlot()
     def str_ids_changed(self):
         print(self.get_str_ids())
+        ids = self.get_str_ids()
+        self.hwButtonsLabel.show() if len(ids) else self.hwButtonsLabel.hide()
+        for i in reversed(range(self.hwButtonsLay.count())):
+            widgetToRemove = self.hwButtonsLay.itemAt(i).widget()
+            self.hwButtonsLay.removeWidget(widgetToRemove)
+            widgetToRemove.setParent(None)
+        for string_id in ids:
+            button = QPushButton(string_id, self)
+            self.hwButtonsLay.addWidget(button)
 
     @pyqtSlot()
     def megaRadioButtonclick(self):
@@ -82,7 +95,8 @@ class App(QMainWindow):
         self.megaRadioButton.setChecked(False)
 
     def get_str_ids(self):
-        return self.defaultInps['string ids'].text().strip().split(' ')
+        res = self.defaultInps['string ids'].text().strip().split(' ')
+        return list(filter(lambda string_id: string_id != "", res))
 
     def default_inputs_check(self):
         self.data.QUEST_NAME = self.defaultInps['quest name'].text()
