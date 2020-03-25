@@ -32,13 +32,19 @@ class HWDialog(QDialog):
     # todo: use strategy for get_magnet_locks and get_simple_leds
     def get_magnet_locks(self):
         res = []
-        for lock in self.maglock.text().strip().split(';'):
+        text = self.maglock.text().strip()
+        if len(text) == 0:
+            return res
+        for lock in text.split(';'):
             res.append([x.strip() for x in lock.split(',')])
         return res
 
     def get_simple_leds(self):
         res = []
-        for led in self.simpleled.text().strip().split(';'):
+        text = self.simpleled.text().strip()
+        if len(text) == 0:
+            return res
+        for led in text.split(';'):
             res.append([x.strip() for x in led.split(',')])
         return res
 
@@ -55,7 +61,10 @@ class HWDialog(QDialog):
 
     def get_timers(self):
         res = []
-        timers = [x.strip() for x in self.timer.text().strip().split(',')]
+        text = self.timer.text().strip()
+        if len(text) == 0:
+            return res
+        timers = [x.strip() for x in text.split(',')]
         for timer in timers:
             res.append([timer, ])
         return res
@@ -79,9 +88,4 @@ class HWDialog(QDialog):
 
     @pyqtSlot()
     def submitted(self):
-        print(self.get_magnet_locks())
-        print(self.get_simple_leds())
-        print(self.get_ard_sensors())
-        print(self.get_timers())
-        print(self.get_array_ard_sensors())
         self.close()
