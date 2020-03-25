@@ -1,0 +1,5 @@
+upper, 8; lower, 9
+led, 7
+reed, 25, LOW, 600
+music_off, relauncher
+sensors, 7, 8, 9, LOW, 100
