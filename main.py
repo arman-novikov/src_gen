@@ -3,10 +3,10 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from builder import *
+from hw_dialog import HWDialog
 
 
 class App(QMainWindow):
-
     def __init__(self):
         super().__init__()
         self.title = 'Indestroom source generator'
@@ -21,6 +21,8 @@ class App(QMainWindow):
             "quest name", "EK number", "string ids", "numbers in erp", "IP addr last byte"]
         self.defaultInps = {}
         self.data = Data()
+        self.hw_dialogs = {}
+        self.hw_buttons = {}
         self.initUI()
 
     def initUI(self):
@@ -73,16 +75,26 @@ class App(QMainWindow):
 
     @pyqtSlot()
     def str_ids_changed(self):
-        print(self.get_str_ids())
         ids = self.get_str_ids()
         self.hwButtonsLabel.show() if len(ids) else self.hwButtonsLabel.hide()
         for i in reversed(range(self.hwButtonsLay.count())):
             widgetToRemove = self.hwButtonsLay.itemAt(i).widget()
             self.hwButtonsLay.removeWidget(widgetToRemove)
             widgetToRemove.setParent(None)
+        self.hw_dialogs = {}
+        self.hw_buttons = {}
         for string_id in ids:
-            button = QPushButton(string_id, self)
-            self.hwButtonsLay.addWidget(button)
+            button = QPushButton(string_id)
+            dlg = HWDialog(string_id)
+            self.hw_dialogs[string_id] = dlg
+            self.hw_buttons[string_id] = button
+            self.hw_buttons[string_id].clicked.connect(lambda: self.hw_button_clicked())
+            self.hwButtonsLay.addWidget(self.hw_buttons[string_id])
+
+    @pyqtSlot()
+    def hw_button_clicked(self):
+        string_id = self.sender().text()
+        self.hw_dialogs[string_id].show()
 
     @pyqtSlot()
     def megaRadioButtonclick(self):
@@ -93,6 +105,12 @@ class App(QMainWindow):
     def unoRadioButtonclick(self):
         self.data.BOARD = "uno"
         self.megaRadioButton.setChecked(False)
+
+    @pyqtSlot()
+    def hw_generate_submitted(self, string_id):
+        dlg = self.hw_dialogs[string_id]
+        print(dlg.maglock.text())
+        dlg.close()
 
     def get_str_ids(self):
         res = self.defaultInps['string ids'].text().strip().split(' ')
