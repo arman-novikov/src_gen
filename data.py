@@ -1,30 +1,31 @@
 from os import getcwd, mkdir
 from os.path import join
 
+
 class Data:
 	def __init__(self):
 		self.QUEST_NAME = "QUEST"
 		self.EK_NUM = 1
-		self.IDS = []
-		self.ERP_NUM = []
+		self.IDS = ["prop", "riddle", "puzzle", ]
+		self.ERP_NUM = [1, 10, -1, ]
 		self.IP_END = 51
 		self.BOARD = "megaatmega2560"
 		self.GUARD = "#pragma once"
-		self.CONFIGS = [
-			{
+		self.CONFIGS = { # example
+			"prop": {
 				"MagnetLock": [["upper_door", "5",],],
 				"SimpleLed":  [["illumination", "8"],],
 				"ArdSensor":  [["reed", "2", "HIGH, 400"],],
 				"Timer":	  [["music_publisher"],],
 			},
 
-			{
+			"riddle": {
 				"MagnetLock": [["exit_door", "A0",], ["snicth", "A1"]],
 				"SimpleLed":  [["upper_led", "9"], ["snitch_led", "4"]],
 				"ArdSensors": ["sensors", ["3, 7, 6,", "LOW, 100"],],
 				"Timer":	  [["reseter"],],
 			},
-		]
+		}
 
 	def get_board(self):
 		return self.BOARD

@@ -1,13 +1,13 @@
 from data import *
 
-def pin_declarator(prop_num, data):
+def pin_declarator(string_id, data):
 	PIN_DEC = "  constexpr uint8_t {}_PIN = {};\n"
 	PINS_DEC = "  constexpr uint8_t {}_PINS${}@ = {{\n    {}  \n  }};\n"
 	res = ""
 	prop_dict = {}
 	try:
-		prop_dict = data.get_config()[prop_num]
-	except IndexError:
+		prop_dict = data.get_config()[string_id]
+	except KeyError:
 		return res
 
 	try:
@@ -52,10 +52,10 @@ constexpr char CIRCUIT_NAME[] = \"{data.get_circuit_name()}\";
 constexpr byte IP_ENDING = {str(data.get_IP_end())};
 constexpr bool UPLOAD_BOOT_INFO = true;\n
 """
-	for i in range(data.get_props_num()):
+	for string_id in data.get_ids():
 		try:
-			CONFS = pin_declarator(i, data);
-			content += f"namespace {data.get_ids()[i]}_ns {{\n{CONFS}\n}}\n\n"
+			CONFS = pin_declarator(string_id, data);
+			content += f"namespace {string_id}_ns {{\n{CONFS}\n}}\n\n"
 		except IndexError:
 			pass
 	f.write(content)

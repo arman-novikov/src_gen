@@ -1,14 +1,14 @@
 from data import *
 
-def obj_declarator(prop_num, data):
+def obj_declarator(string_id, data):
 	OBJ = "{} *{};\n"
 	OBJS = "{} *{}${}@;\n"
 	res = ""
 	ids = data.get_ids()
 	prop_dict = {}
 	try:
-		prop_dict = data.get_config()[prop_num]
-	except IndexError:
+		prop_dict = data.get_config()[string_id]
+	except KeyError:
 		return res
 	try:
 		maglocks = prop_dict["MagnetLock"]
@@ -35,7 +35,7 @@ def obj_declarator(prop_num, data):
 		ardsens = prop_dict["ArdSensors"]
 		pins = ardsens[1][0]
 		name = ardsens[0]
-		pins_num = f"{ids[prop_num]}_ns::{name.upper()}_PINS_COUNT"
+		pins_num = f"{string_id}_ns::{name.upper()}_PINS_COUNT"
 		res += OBJS.format("ArdSensor", ardsens[0], pins_num)
 	except KeyError:
 		pass
@@ -50,8 +50,7 @@ def obj_declarator(prop_num, data):
 	return res.replace("$", "[").replace("@","]")
 
 
-def obj_initor(prop_num, data):
-	ids = data.get_ids()
+def obj_initor(string_id, data):
 	OBJ = "  {} = new {}({});\n"
 	OBJS = """  for (size_t i = 0; i < {}; ++i) {{
     {}$i@ = new {}({});
@@ -59,18 +58,17 @@ def obj_initor(prop_num, data):
 """
 	NS = "{}_ns::{}_PIN{}"
 	res = ""
-	prop_dict = {}
 
 	try:
-		prop_dict = data.get_config()[prop_num]
-	except IndexError:
+		prop_dict = data.get_config()[string_id]
+	except KeyError:
 		return res
 
 	try:
 		maglocks = prop_dict["MagnetLock"]
 		for i in range(len(maglocks)):
 			name = maglocks[i][0]
-			res += OBJ.format(name, "MagnetLock", NS.format(ids[prop_num], name.upper(), ""))
+			res += OBJ.format(name, "MagnetLock", NS.format(string_id, name.upper(), ""))
 	except KeyError:
 		pass
 
@@ -79,7 +77,7 @@ def obj_initor(prop_num, data):
 		for i in range(len(leds)):
 			name = leds[i][0]
 			res += OBJ.format(name, "SimpleLed",
-				NS.format(ids[prop_num], name.upper(), ""))
+				NS.format(string_id, name.upper(), ""))
 	except KeyError:
 		pass
 
@@ -88,16 +86,16 @@ def obj_initor(prop_num, data):
 		for i in range(len(ardsen)):
 			name = ardsen[i][0]
 			params = ardsen[i][2]
-			res += OBJ.format(name, "ArdSensor", NS.format(ids[prop_num], name.upper(), ", " + params))
+			res += OBJ.format(name, "ArdSensor", NS.format(string_id, name.upper(), ", " + params))
 	except KeyError:
 		pass	
 
 	try:
 		ardsens = prop_dict["ArdSensors"]
 		name = ardsens[0]
-		res += OBJS.format(NS.format(ids[prop_num], name.upper(), "S_COUNT"),
+		res += OBJS.format(NS.format(string_id, name.upper(), "S_COUNT"),
 			name, "ArdSensor",
-			NS.format(ids[prop_num], name.upper(), "S$i@, ") + ardsens[1][1])
+			NS.format(string_id, name.upper(), "S$i@, ") + ardsens[1][1])
 	except KeyError:
 		pass
 
@@ -111,13 +109,12 @@ def obj_initor(prop_num, data):
 	return res.replace("$", "[").replace("@","]")
 
 
-def routines_creator(prop_num, data):
+def routines_creator(string_id, data):
 	ROUTINE = "  {}->routine();\n"
-	name = data.get_ids()[prop_num]
-	res = f"  if ({name}_stage != {name.upper()}_STAGE_GAME)\n    return;\n\n"
+	res = f"  if ({string_id}_stage != {string_id.upper()}_STAGE_GAME)\n    return;\n\n"
 	timers = []
 	try:
-		timers = data.get_config()[prop_num]["Timer"]
+		timers = data.get_config()[string_id]["Timer"]
 	except (KeyError, IndexError):
 		return ""
 
@@ -128,14 +125,7 @@ def routines_creator(prop_num, data):
 
 
 def props_creator(data):
-	props_num = data.get_props_num()
-	ids = data.get_ids()
-	for i in range(props_num):
-		try:
-			name = ids[i]
-		except IndexError:
-			continue
-
+	for name in data.get_ids():
 		f = s_open(join("src", f"{name}.h"), data)
 		content = f"""{data.get_guard()}
 #include <ds_basic.h>
@@ -145,7 +135,7 @@ enum {{
   {name.upper()}_STAGE_NONE,
   {name.upper()}_STAGE_GAME,
   {name.upper()}_STAGE_DONE }} {name}_stage;\n\n"""		
-		content += obj_declarator(i, data)
+		content += obj_declarator(name, data)
 		content += f"""
 void {name}_onActivate()
 {{
@@ -163,7 +153,7 @@ void {name}_onFinish()
 
 void {name}_init()
 {{\n"""
-		content += obj_initor(i, data)
+		content += obj_initor(name, data)
 		content += f"""
   {name}_stage = {name.upper()}_STAGE_NONE;  
   strcpy(props_states${name.upper()}_STATE_POS@, MQTT_STRSTATUS_READY);
@@ -171,7 +161,7 @@ void {name}_init()
 
 void {name}_routine()
 {{\n"""
-		content += routines_creator(i, data)
+		content += routines_creator(name, data)
 		content += "}"
 
 		content = content.replace("$", "[").replace("@","]")

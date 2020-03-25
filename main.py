@@ -65,7 +65,21 @@ class App(QMainWindow):
     def generate_btn_click(self):
         if self.default_inputs_check() is False:
             return
-        self.data.CONFIGS = []  # no gui support yet
+        self.data.CONFIGS = {}
+        for string_id, dlg in self.hw_dialogs.items():
+            hw_dict = {}
+            params = {
+                "MagnetLock": dlg.get_magnet_locks(),
+                "SimpleLed": dlg.get_simple_leds(),
+                "ArdSensor": dlg.get_ard_sensors(),
+                "Timer": dlg.get_timers(),
+                "ArdSensors": dlg.get_array_ard_sensors(),
+            }
+            for name, values in params.items():
+                if len(values):
+                    hw_dict[name] = values
+            if len(hw_dict):
+                self.data.CONFIGS[string_id] = hw_dict
         try:
             build(self.data)
         except FileExistsError:
@@ -105,12 +119,6 @@ class App(QMainWindow):
     def unoRadioButtonclick(self):
         self.data.BOARD = "uno"
         self.megaRadioButton.setChecked(False)
-
-    @pyqtSlot()
-    def hw_generate_submitted(self, string_id):
-        dlg = self.hw_dialogs[string_id]
-        print(dlg.maglock.text())
-        dlg.close()
 
     def get_str_ids(self):
         res = self.defaultInps['string ids'].text().strip().split(' ')
