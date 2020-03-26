@@ -110,18 +110,19 @@ def obj_initor(string_id, data):
 
 
 def routines_creator(string_id, data):
-	ROUTINE = "  {}->routine();\n"
-	res = f"  if ({string_id}_stage != {string_id.upper()}_STAGE_GAME)\n    return;\n\n"
-	timers = []
+	routine_call = "  {}->routine();\n"
 	try:
 		timers = data.get_config()[string_id]["Timer"]
 	except (KeyError, IndexError):
 		return ""
-
+	res = ""
 	for i in timers:
-		res += ROUTINE.format(i);
+		res += routine_call.format(i)
+	res += '\n'
 
-	return res.replace("]","").replace("[","").replace("\'","");
+	res += f"  if ({string_id}_stage != {string_id.upper()}_STAGE_GAME)\n    return;\n\n"
+
+	return res.replace("]", "").replace("[", "").replace("\'", "")
 
 
 def props_creator(data):
