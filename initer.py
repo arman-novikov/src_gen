@@ -7,7 +7,7 @@ platform = atmelavr
 board = {data.get_board()}
 framework = arduino
 
-ip_addr = 192.168.10.{data.get_IP_end()}
+ip_addr = 192.168.10.49
 host = 192.168.10.1
 login = root
 password = 1
