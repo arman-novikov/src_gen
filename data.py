@@ -55,13 +55,16 @@ class Data:
 		return self.ERP_NUM
 
 	def get_circuit_name(self):
-		name = f"{self.QUEST_NAME}"
+		name = f"{self.QUEST_NAME}_EK{str(self.get_ek())}"
 		for i in self.IDS:
 			name += "_" + i.capitalize()
 		return name
 
 	def get_work_dir(self):
-		return join(getcwd(), self.get_circuit_name())
+		folder_name = f"{self.QUEST_NAME}"
+		for i in self.IDS:
+			folder_name += "_" + i.capitalize()
+		return join(getcwd(), folder_name)
 
 
 def work_dir_creator(data):	
